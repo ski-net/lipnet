@@ -8,6 +8,10 @@ def multi_p_run(tot_num, _func, worker, n_process):
     split_num = split_seq(list(range(0, tot_num)), n_process) # start 0
 
     print (tot_num, ">>", split_num)
+    
+    split_len = len(split_num) 
+    if n_process > split_len:
+        n_process = split_len
 
     for i in range(n_process):
         p = Process(
