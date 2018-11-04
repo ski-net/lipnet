@@ -186,7 +186,7 @@ class Align(object):
 def preprocess(from_idx, to_idx):
     SOURCE_EXTS = '*.mpg'
     _SOURCE_PATH = '../datasets/'
-    TARGET_PATH = '../TARGET/' 
+    TARGET_PATH = '../datasets/TARGET/' 
 
     FACE_PREDICTOR_PATH = './shape_predictor_68_face_landmarks.dat'
     succ = set()
@@ -215,8 +215,8 @@ def preprocess(from_idx, to_idx):
 
 if __name__ == '__main__':
     import os
-    os.makedirs('../TARGET', exist_ok=True)
-    os.system('rm -rf ../TARGET/*')
+    os.makedirs('../datasets/TARGET', exist_ok=True)
+    os.system('rm -rf ../datasets/TARGET/*')
     res = multi_p_run(35, put_worker, preprocess, 9)
 
 
