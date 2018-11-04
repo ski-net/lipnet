@@ -35,10 +35,10 @@ def download_align(from_idx, to_idx):
 
 if __name__ == '__main__':
     #res = multi_p_run(35, put_worker, _worker, 5)
-    res = multi_p_run(5, put_worker, download_mp4, 7)    
+    res = multi_p_run(35, put_worker, download_mp4, 5)    
     print (res)
 
-    res = multi_p_run(35, put_worker, download_align, 7)
+    res = multi_p_run(35, put_worker, download_align, 5)
     print (res)
 
     os.system('rm -f datasets/*.zip && rm -f datasets/*/Thumbs.db')
