@@ -2,7 +2,9 @@
 
 ---
 
-Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading] (https://arxiv.org/abs/1611.01599)
+Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading](https://arxiv.org/abs/1611.01599)
+
+![net_structure](asset/network_structure.png)
 
 ## Requirements
 - Python 3.6.4
@@ -10,8 +12,8 @@ Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading] (https://
 
 
 ## Test Environment
-- 4 cores
-- 1 GPU (Tesla K80)
+- 4 CPU cores
+- 1 GPU (Tesla K80 12GB)
 
 
 ## Data Structure
