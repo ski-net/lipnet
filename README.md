@@ -43,8 +43,16 @@ The training data folder should look like :
 
 - arguments
   - batch_size : Define batch size (defualt=64)
-  - epoches : Define total epoches (default=50)
-  - GPU_COUNT : Use GPU count (default=2)
+  - epochs : Define total epochs (default=100)
+  - image_path : Path for lip image files (default='./data/datasets/')
+  - align_path : Path for align files (default='./data/align/')
+  - dr_rate : dropout rate(default=0.5)
+  - use_gpu : Use gpu (default=True)
+  - num_workers : num of workers when generating data (default=2)
+  
+```
+python main.py
+```
 
 ## Results
 ```
@@ -71,6 +79,4 @@ The training data folder should look like :
  'lay red at j nine now']
  ```
   
-## Reference
-- https://github.com/kimhc6028/relational-networks
-  - show_status : show loss and accuracy for each epoch (default=True)
+
