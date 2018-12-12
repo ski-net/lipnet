@@ -3,6 +3,7 @@
 ---
 
 Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading] (https://arxiv.org/abs/1611.01599)
+![net_structure](assets/network_structure.png)
 
 ## Requirements
 - Python 3.6.4
