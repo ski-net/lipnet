@@ -20,19 +20,20 @@ Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading] (https://
 The training data folder should look like : 
 <train_data_root>
                 |--datasets
-                        |--images
-                           |--trainval
-                              |--ZzugJPASNB8
-                                 |--50001
-                                    |--mouth_000.png
-                                       ...
-                           |--test
-                               ...
-                        |--npy
-                           |--data_sizes_py.npy
-                           |--file_id_feature_size.npy
-                           |--file_key_p3.npy
-                           |--speech_text_dict_p3.npy
-                           |--speech_text_pad_dict_p3.npy
+                        |--s1
+                           |--bbir7s
+                               |--mouth_000.png
+                               |--mouth_001.png
+                                   ...
+                           |--bgaa8p
+                               |--mouth_000.png
+                               |--mouth_001.png
+                                  ...
+                        |--s2
+                            ...
+                 |--align
+                         |--bw1d8a.align
+                         |--bggzzs.align
+                             ...
 
 ```
