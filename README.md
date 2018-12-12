@@ -12,8 +12,8 @@ Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading](https://a
 
 
 ## Test Environment
-- 4 cores
-- 1 GPU (Tesla K80)
+- 4 CPU cores
+- 1 GPU (Tesla K80 12GB)
 
 
 ## Data Structure
