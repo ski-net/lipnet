@@ -6,3 +6,4 @@ scikit-image==0.13.1
 scikit-video==1.1.11
 tqdm
 mxnet-cu90==1.3.0
+dlib==19.15.0
