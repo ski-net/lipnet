@@ -1,11 +1,28 @@
-def multi_p_run(tot_num, _func, worker, n_process):
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+def multi_p_run(tot_num, _func, worker, params, n_process):
     from multiprocessing import Process, Queue
     import math
 
     out_q = Queue()
     procs = []
     
-    split_num = split_seq(list(range(0, tot_num)), n_process) # start 0
+    split_num = split_seq(list(range(0, tot_num)), n_process)
 
     print (tot_num, ">>", split_num)
     
@@ -16,8 +33,8 @@ def multi_p_run(tot_num, _func, worker, n_process):
     for i in range(n_process):
         p = Process(
                 target=_func,
-                args=(worker, split_num[i][0], split_num[i][1], out_q))
-        #p.daemon = True
+                args=(worker, split_num[i][0], split_num[i][1], params, out_q))
+        p.daemon = True
         procs.append(p)
         p.start()
 
@@ -48,11 +65,11 @@ def split_seq(sam_num, n_tile):
     end_num.append(len(sam_num))
     return [[i,j] for i, j in zip(start_num, end_num)]
 
-def put_worker(func, from_idx, to_idx, out_q):
-    succ, fail = func(from_idx, to_idx)
+def put_worker(func, from_idx, to_idx, params, out_q):
+    succ, fail = func(from_idx, to_idx, params)
     return out_q.put({'succ':succ, 'fail':fail})
 
-def _worker(from_idx, to_idx):
+def _worker(from_idx, to_idx, params):
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
@@ -62,8 +79,7 @@ def _worker(from_idx, to_idx):
             fail.add(idx)
     return (succ, fail)
 
-
 if __name__ == '__main__':
-    res = multi_p_run(35, put_worker, _worker, 5)
+    res = multi_p_run(35, put_worker, _worker, params={}, n_process=5)
     print (res)   
 
