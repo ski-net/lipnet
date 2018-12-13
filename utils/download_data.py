@@ -82,15 +82,20 @@ if __name__ == '__main__':
     if exists('./shape_predictor_68_face_landmarks.dat') is False:
         os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 && \
                   bzip2 -d shape_predictor_68_face_landmarks.dat.bz2')
-
-    ## download movie files
+    
     os.makedirs('{src_path}'.format(src_path=PARAMS['src_path']), exist_ok=True)
-    RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_mp4, \
-                      params=PARAMS, n_process=N_PROCESS)
 
-    ## download align files
-    RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_align, \
-                      params=PARAMS, n_process=N_PROCESS)
+    if N_PROCESS == 1:
+        RES = download_mp4(0, 35)
+        RES = download_align(0, 35)
+    else:
+        ## download movie files
+        RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_mp4, \
+                          params=PARAMS, n_process=N_PROCESS)
+
+        ## download align files
+        RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_align, \
+                          params=PARAMS, n_process=N_PROCESS)
 
     os.system('rm -f {src_path}/*.zip && rm -f {src_path}/*/Thumbs.db'.format( \
               src_path=PARAMS['src_path']))
