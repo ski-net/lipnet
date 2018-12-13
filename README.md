@@ -29,8 +29,8 @@ cd ./utils && python download_data.py
 
 ```
 - arguments
-  - src_path : path for videos (default='./data/mp4s/')
-  - align_path : Save path for aligns (default='./data/align/')
+  - src_path : Path for videos (default='./data/mp4s/')
+  - align_path : Path for aligns (default='./data/align/')
   - n_process : num of process (default=1)
 ```
 
@@ -42,9 +42,9 @@ cd ./utils && python preprocess_data.py
 
 ```
 - arguments
-  - src_path : path for videos (default='./data/mp4s/')
-  - tgt_path : path for preprocessed images (default='./data/datasets/')
-  - align_path : Save path for aligns (default='./data/align/')
+  - src_path : Path for videos (default='./data/mp4s/')
+  - tgt_path : Path for preprocessed images (default='./data/datasets/')
+  - align_path : Path for aligns (default='./data/align/')
   - n_process : num of process (default=1)
 ```
 
