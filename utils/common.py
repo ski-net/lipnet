@@ -20,6 +20,7 @@ Module: common
 
 """
 
+
 def char2int(char):
     """
     Convert character to integer.
@@ -29,6 +30,7 @@ def char2int(char):
     elif char == ' ':
         return 26
     return None
+
 
 def int2char(num):
     """
@@ -40,6 +42,7 @@ def int2char(num):
         return ' '
     return None
 
+
 def word_to_vector(word):
     """
     Convert character vectors to integer vectors.
@@ -49,6 +52,7 @@ def word_to_vector(word):
         vector.append(char2int(char))
     return vector
 
+
 def vector_to_word(vector):
     """
     Convert integer vectors to character vectors.
@@ -57,6 +61,7 @@ def vector_to_word(vector):
     for vec in vector:
         word = word + int2char(vec)
     return word
+
 
 def char_conv(out):
     """

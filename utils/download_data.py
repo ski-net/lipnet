@@ -23,6 +23,7 @@ import os
 from os.path import exists
 from multi import multi_p_run, put_worker
 
+
 def download_mp4(from_idx, to_idx, _params):
     """
     download mp4s
@@ -45,6 +46,7 @@ def download_mp4(from_idx, to_idx, _params):
             print(error)
             fail.add(idx)
     return (succ, fail)
+
 
 def download_align(from_idx, to_idx, _params):
     """
@@ -76,24 +78,24 @@ if __name__ == '__main__':
     PARSER.add_argument('--align_path', type=str, default='../data')
     PARSER.add_argument('--n_process', type=int, default=1)
     CONFIG = PARSER.parse_args()
-    PARAMS = {'src_path':CONFIG.src_path, 'align_path':CONFIG.align_path}
+    PARAMS = {'src_path': CONFIG.src_path, 'align_path': CONFIG.align_path}
     N_PROCESS = CONFIG.n_process
 
     if exists('./shape_predictor_68_face_landmarks.dat') is False:
         os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 && \
                   bzip2 -d shape_predictor_68_face_landmarks.dat.bz2')
-    
+
     os.makedirs('{src_path}'.format(src_path=PARAMS['src_path']), exist_ok=True)
 
     if N_PROCESS == 1:
-        RES = download_mp4(0, 35)
-        RES = download_align(0, 35)
+        RES = download_mp4(0, 35, PARAMS)
+        RES = download_align(0, 35, PARAMS)
     else:
-        ## download movie files
+        # download movie files
         RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_mp4, \
                           params=PARAMS, n_process=N_PROCESS)
 
-        ## download align files
+        # download align files
         RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_align, \
                           params=PARAMS, n_process=N_PROCESS)
 

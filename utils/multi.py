@@ -19,6 +19,7 @@
 Module: preprocess with multi-process
 """
 
+
 def multi_p_run(tot_num, _func, worker, params, n_process):
     """
     Run _func with multi-process using params.
@@ -37,7 +38,8 @@ def multi_p_run(tot_num, _func, worker, params, n_process):
 
     for i in range(n_process):
         _p = Process(target=_func,
-                     args=(worker, split_num[i][0], split_num[i][1], params, out_q))
+                     args=(worker, split_num[i][0], split_num[i][1],
+                           params, out_q))
         _p.daemon = True
         procs.append(_p)
         _p.start()
@@ -60,6 +62,7 @@ def multi_p_run(tot_num, _func, worker, params, n_process):
 
     return result
 
+
 def split_seq(sam_num, n_tile):
     """
     Spli the number(sam_num) into numbers by n_tile
@@ -72,12 +75,14 @@ def split_seq(sam_num, n_tile):
     end_num.append(len(sam_num))
     return [[i, j] for i, j in zip(start_num, end_num)]
 
+
 def put_worker(func, from_idx, to_idx, params, out_q):
     """
     put worker
     """
     succ, fail = func(from_idx, to_idx, params)
-    return out_q.put({'succ':succ, 'fail':fail})
+    return out_q.put({'succ': succ, 'fail': fail})
+
 
 def test_worker(from_idx, to_idx, params):
     """
@@ -92,6 +97,7 @@ def test_worker(from_idx, to_idx, params):
         except ValueError:
             fail.add(idx)
     return (succ, fail)
+
 
 if __name__ == '__main__':
     RES = multi_p_run(35, put_worker, test_worker, params={}, n_process=5)

@@ -23,6 +23,7 @@ This is used when the data is genrated by LipsDataset
 import numpy as np
 from .common import word_to_vector
 
+
 class Align(object):
     """
     Preprocess for Align
@@ -43,7 +44,7 @@ class Align(object):
         words = []
         for line in lines:
             _op, _ed, word = line.strip().split(' ')
-            if not word in Align.skip_list:
+            if word not in Align.skip_list:
                 words.append((int(_op), int(_ed), word))
         self.words = words
         self.n_words = len(words)

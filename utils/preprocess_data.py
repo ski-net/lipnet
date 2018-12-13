@@ -249,4 +249,4 @@ if __name__ == '__main__':
     if N_PROCESS == 1:
         RES = multi_p_run(35, put_worker, preprocess, PARAMS, N_PROCESS)
     else:
-        RES = preprocess(0, 35)
+        RES = preprocess(0, 35, PARAMS)
