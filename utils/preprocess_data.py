@@ -1,3 +1,20 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 ## reference: https://github.com/rizkiarm/LipNet
 
 import os
@@ -183,24 +200,24 @@ class Align(object):
     def label_length(self):
         return len(self.label)
 
-def preprocess(from_idx, to_idx):
+def preprocess(from_idx, to_idx, params):
     SOURCE_EXTS = '*.mpg'
-    _SOURCE_PATH = '../datasets/'
-    TARGET_PATH = '../datasets/TARGET/' 
+    SOURCE_PATH = params['src_path']
+    TARGET_PATH = params['tgt_path']
 
     FACE_PREDICTOR_PATH = './shape_predictor_68_face_landmarks.dat'
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
 
-        SOURCE_PATH = _SOURCE_PATH + 's' + str(idx) + '/'
-        #TARGET_PATH = _TARGET_PATH + 's' + str(idx) + '/'
+        SOURCE_PATH = SOURCE_PATH + '/' + 's' + str(idx) + '/'
         try:
             for filepath in find_files(SOURCE_PATH, SOURCE_EXTS):
                 print ("Processing: {}".format(filepath))
-                video = Video(vtype='face', face_predictor_path=FACE_PREDICTOR_PATH).from_video(filepath)
+                video = Video(vtype='face', \
+                              face_predictor_path=FACE_PREDICTOR_PATH).from_video(filepath)
 
-                filepath_wo_ext = os.path.splitext(filepath)[0]
+                filepath_wo_ext = os.path.splitext(filepath)[0].split('/')[-1]
                 target_dir = os.path.join(TARGET_PATH, filepath_wo_ext)
                 mkdir_p(target_dir)
 
@@ -209,14 +226,26 @@ def preprocess(from_idx, to_idx):
                     io.imsave(os.path.join(target_dir, "mouth_{0:03d}.png".format(i)), frame)
                     i += 1
             succ.add(idx)
-        except:
+        except Exception as e:
+            print (e)
             fail.add(idx)
     return (succ, fail)
 
 if __name__ == '__main__':
+    import argparse
     import os
-    os.makedirs('../datasets/TARGET', exist_ok=True)
-    os.system('rm -rf ../datasets/TARGET/*')
-    res = multi_p_run(35, put_worker, preprocess, 9)
+    from multi import multi_p_run, put_worker
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--src_path', type=str, default='../data/mp4s')
+    parser.add_argument('--tgt_path', type=str, default='../data/datasets')
+    parser.add_argument('--align_path', type=str, default='../data/align')
+    config = parser.parse_args()    
+    params = {'src_path':config.src_path, 
+              'tgt_path':config.tgt_path, 
+              'align_path':config.align_path}
+
+    os.makedirs('{tgt_path}'.format(tgt_path=params['tgt_path']), exist_ok=True)
+    os.system('rm -rf {tgt_path}'.format(tgt_path=params['tgt_path']))
+    res = multi_p_run(35, put_worker, preprocess, params, 9)
 
 
