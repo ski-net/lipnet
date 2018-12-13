@@ -22,32 +22,26 @@ Gluon inplementation of [LipNet: End-to-End Sentence-level Lipreading](https://a
 - Align: word alignments(190 K each) 
 
 ## Prepare the Data
-- Download the data
-```
-cd ./utils && python download_data.py
-```
-
-```
+### Download the data
 - arguments
   - src_path : Path for videos (default='./data/mp4s/')
   - align_path : Path for aligns (default='./data/align/')
   - n_process : num of process (default=1)
-```
-
-- Preprocess the Data: Extracting the mouth images from a video and save it.
 
 ```
-cd ./utils && python preprocess_data.py
+cd ./utils && python download_data.py
 ```
 
-```
+### Preprocess the Data: Extracting the mouth images from a video and save it.
 - arguments
   - src_path : Path for videos (default='./data/mp4s/')
   - tgt_path : Path for preprocessed images (default='./data/datasets/')
   - align_path : Path for aligns (default='./data/align/')
   - n_process : num of process (default=1)
-```
 
+```
+cd ./utils && python preprocess_data.py
+```
 
 ## Data Structure
 
