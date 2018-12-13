@@ -15,67 +15,84 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from multi import multi_p_run, put_worker, _worker
+"""
+Module: download_data
+"""
 
-def download_mp4(from_idx, to_idx, params):
-    import os
+import os
+from os.path import exists
+from multi import multi_p_run, put_worker
+
+def download_mp4(from_idx, to_idx, _params):
+    """
+    download mp4s
+    """
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
         try:
             name = 's' + str(idx)
-            script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/video/{nm}.mpg_vcd.zip".format(nm=name)
-            down_script = 'cd {src_path} && curl {script} --output {nm}.mpg_vcd.zip && unzip {nm}.mpg_vcd.zip'.format( \
-                script=script, nm=name, src_path=params['src_path'])
-            print (down_script)
-            os.system(down_script)
+            script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/video/{nm}.mpg_vcd.zip".format( \
+                     nm=name)
+            down_sc = 'cd {src_path} && curl {script} --output {nm}.mpg_vcd.zip && \
+                       unzip {nm}.mpg_vcd.zip'.format(script=script,
+                                                      nm=name,
+                                                      src_path=_params['src_path'])
+            print(down_sc)
+            os.system(down_sc)
             succ.add(idx)
-        except Exception as e:
-            print (e)
+        except OSError as error:
+            print(error)
             fail.add(idx)
     return (succ, fail)
 
-def download_align(from_idx, to_idx, params):
-    import os
+def download_align(from_idx, to_idx, _params):
+    """
+    download aligns
+    """
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
         try:
             name = 's' + str(idx)
             script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/align/{nm}.tar".format(nm=name)
-            down_script = 'cd {align_path} && wget {script} && tar -xvf {nm}.tar'.format(script=script, \
-                          nm=name,  \
-                          align_path=params['align_path'])
-            print (down_script)
-            os.system(down_script)
+            down_sc = 'cd {align_path} && wget {script} && \
+                       tar -xvf {nm}.tar'.format(script=script,
+                                                 nm=name,
+                                                 align_path=_params['align_path'])
+            print(down_sc)
+            os.system(down_sc)
             succ.add(idx)
-        except Exception as e:
-            print (e)
+        except OSError as error:
+            print(error)
             fail.add(idx)
     return (succ, fail)
 
 
 if __name__ == '__main__':
     import argparse
-    import os
-    from os.path import exists
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--src_path', type=str, default='../data/mp4s')
-    parser.add_argument('--align_path', type=str, default='../data')
-    config = parser.parse_args()    
-    params = {'src_path':config.src_path, 'align_path':config.align_path}
-    
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument('--src_path', type=str, default='../data/mp4s')
+    PARSER.add_argument('--align_path', type=str, default='../data')
+    PARSER.add_argument('--n_process', type=int, default=1)
+    CONFIG = PARSER.parse_args()
+    PARAMS = {'src_path':CONFIG.src_path, 'align_path':CONFIG.align_path}
+    N_PROCESS = CONFIG.n_process
+
     if exists('./shape_predictor_68_face_landmarks.dat') is False:
-        os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 && bzip2 -d shape_predictor_68_face_landmarks.dat.bz2')
-    
+        os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 && \
+                  bzip2 -d shape_predictor_68_face_landmarks.dat.bz2')
+
     ## download movie files
-    os.makedirs('{src_path}'.format(src_path=params['src_path']), exist_ok=True)
-    res = multi_p_run(tot_num=35, _func=put_worker, worker=download_mp4, params=params, n_process=5)    
-    print (res)
+    os.makedirs('{src_path}'.format(src_path=PARAMS['src_path']), exist_ok=True)
+    RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_mp4, \
+                      params=PARAMS, n_process=N_PROCESS)
 
     ## download align files
-    res = multi_p_run(tot_num=35, _func=put_worker, worker=download_align, params=params, n_process=5)
-    print (res)
+    RES = multi_p_run(tot_num=35, _func=put_worker, worker=download_align, \
+                      params=PARAMS, n_process=N_PROCESS)
 
-    os.system('rm -f {src_path}/*.zip && rm -f {src_path}/*/Thumbs.db'.format(src_path=params['src_path']))
-    os.system('rm -f {align_path}/*.tar && rm -f {align_path}/Thumbs.db'.format(align_path=params['align_path']))
+    os.system('rm -f {src_path}/*.zip && rm -f {src_path}/*/Thumbs.db'.format( \
+              src_path=PARAMS['src_path']))
+    os.system('rm -f {align_path}/*.tar && rm -f {align_path}/Thumbs.db'.format( \
+              align_path=PARAMS['align_path']))

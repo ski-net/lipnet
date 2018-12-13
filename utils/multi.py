@@ -15,28 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
-def multi_p_run(tot_num, _func, worker, params, n_process):
-    from multiprocessing import Process, Queue
-    import math
+"""
+Module: preprocess with multi-process
+"""
 
+def multi_p_run(tot_num, _func, worker, params, n_process):
+    """
+    Run _func with multi-process using params.
+    """
+    from multiprocessing import Process, Queue
     out_q = Queue()
     procs = []
-    
+
     split_num = split_seq(list(range(0, tot_num)), n_process)
 
-    print (tot_num, ">>", split_num)
-    
-    split_len = len(split_num) 
+    print(tot_num, ">>", split_num)
+
+    split_len = len(split_num)
     if n_process > split_len:
         n_process = split_len
 
     for i in range(n_process):
-        p = Process(
-                target=_func,
-                args=(worker, split_num[i][0], split_num[i][1], params, out_q))
-        p.daemon = True
-        procs.append(p)
-        p.start()
+        _p = Process(target=_func,
+                     args=(worker, split_num[i][0], split_num[i][1], params, out_q))
+        _p.daemon = True
+        procs.append(_p)
+        _p.start()
 
     try:
         result = []
@@ -44,42 +48,51 @@ def multi_p_run(tot_num, _func, worker, params, n_process):
             result.append(out_q.get())
         for i in procs:
             i.join()
-    except KeyboardInterrupt as e:
-        print ('Killing all the childer in the pool.')
+    except KeyboardInterrupt:
+        print('Killing all the childer in the pool.')
         for i in procs:
             i.terminate()
             i.join()
         return -1
 
     while not out_q.empty():
-        print (out_q.get(block=False))
+        print(out_q.get(block=False))
 
     return result
 
 def split_seq(sam_num, n_tile):
+    """
+    Spli the number(sam_num) into numbers by n_tile
+    """
     import math
-    print (sam_num)
-    print (n_tile)
+    print(sam_num)
+    print(n_tile)
     start_num = sam_num[0::int(math.ceil(len(sam_num) / (n_tile)))]
     end_num = start_num[1::]
     end_num.append(len(sam_num))
-    return [[i,j] for i, j in zip(start_num, end_num)]
+    return [[i, j] for i, j in zip(start_num, end_num)]
 
 def put_worker(func, from_idx, to_idx, params, out_q):
+    """
+    put worker
+    """
     succ, fail = func(from_idx, to_idx, params)
     return out_q.put({'succ':succ, 'fail':fail})
 
-def _worker(from_idx, to_idx, params):
+def test_worker(from_idx, to_idx, params):
+    """
+    the worker to test multi-process
+    """
+    params = params
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
         try:
             succ.add(idx)
-        except:
+        except ValueError:
             fail.add(idx)
     return (succ, fail)
 
 if __name__ == '__main__':
-    res = multi_p_run(35, put_worker, _worker, params={}, n_process=5)
-    print (res)   
-
+    RES = multi_p_run(35, put_worker, test_worker, params={}, n_process=5)
+    print(RES)
