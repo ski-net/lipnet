@@ -36,7 +36,6 @@ cd ./utils && python download_data.py
 - arguments
   - src_path : Path for videos (default='./data/mp4s/')
   - tgt_path : Path for preprocessed images (default='./data/datasets/')
-  - align_path : Path for aligns (default='./data/align/')
   - n_process : num of process (default=1)
 
 ```

@@ -198,92 +198,6 @@ class Video(object):
         self.data = data_frames
         self.length = frames_n
 
-class Align(object):
-    """
-    Preprocess for Align
-    """
-
-    def __init__(self, absolute_max_string_len=32, label_func=None):
-        self.label_func = label_func
-        self.absolute_max_string_len = absolute_max_string_len
-        self.align = None
-        self.sentence = None
-        self.label = None
-        self.padded_label = None
-
-    def from_file(self, path):
-        """
-        Read from files
-        """
-        with open(path, 'r') as file:
-            lines = file.readlines()
-        align = [(int(y[0])/1000, int(y[1])/1000, y[2]) \
-                 for y in [x.strip().split(" ") for x in lines]]
-        self.build(align)
-        return self
-
-    def from_array(self, align):
-        """
-        Read from array
-        """
-        self.build(align)
-        return self
-
-    def build(self, align):
-        """
-        Build the align array
-        """
-        self.align = self.strip(align, ['sp', 'sil'])
-        self.sentence = self.get_sentence(align)
-        self.label = self.get_label(self.sentence)
-        self.padded_label = self.get_padded_label(self.label)
-
-    def strip(self, align, items):
-        """
-        Strip
-        """
-        return [sub for sub in align if sub[2] not in items]
-
-    def get_sentence(self, align):
-        """
-        Get sentence
-        """
-        return " ".join([y[-1] for y in align if y[-1] not in ['sp', 'sil']])
-
-    def get_label(self, sentence):
-        """
-        Get label
-        """
-        return self.label_func(sentence)
-
-    def get_padded_label(self, label):
-        """
-        Get padded label
-        """
-        padding = np.ones((self.absolute_max_string_len-len(label))) * -1
-        return np.concatenate((np.array(label), padding), axis=0)
-
-    @property
-    def word_length(self):
-        """
-        word length
-        """
-        return len(self.sentence.split(" "))
-
-    @property
-    def sentence_length(self):
-        """
-        sentence length
-        """
-        return len(self.sentence)
-
-    @property
-    def label_length(self):
-        """
-        label length
-        """
-        return len(self.label)
-
 def preprocess(from_idx, to_idx, _params):
     """
     Preprocess: Convert a video into the mouth images
@@ -323,12 +237,16 @@ if __name__ == '__main__':
     PARSER = argparse.ArgumentParser()
     PARSER.add_argument('--src_path', type=str, default='../data/mp4s')
     PARSER.add_argument('--tgt_path', type=str, default='../data/datasets')
-    PARSER.add_argument('--align_path', type=str, default='../data/align')
+    PARSER.add_argument('--n_process', type=int, default=1)
     CONFIG = PARSER.parse_args()
+    N_PROCESS = CONFIG.n_process
     PARAMS = {'src_path':CONFIG.src_path,
-              'tgt_path':CONFIG.tgt_path,
-              'align_path':CONFIG.align_path}
+              'tgt_path':CONFIG.tgt_path}
 
     os.makedirs('{tgt_path}'.format(tgt_path=PARAMS['tgt_path']), exist_ok=True)
     os.system('rm -rf {tgt_path}'.format(tgt_path=PARAMS['tgt_path']))
-    RES = multi_p_run(35, put_worker, preprocess, PARAMS, 9)
+    
+    if N_PROCESS == 1:
+        RES = multi_p_run(35, put_worker, preprocess, PARAMS, N_PROCESS)
+    else:
+        RES = preprocess(0, 35)
