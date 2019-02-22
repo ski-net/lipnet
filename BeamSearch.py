@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,12 +17,19 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+Module : this module to decode using beam search
+https://github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/blob/master/utils/CTCDecoder/BeamSearch.py 
+"""
+
 from __future__ import division
 from __future__ import print_function
 import numpy as np
 
 class BeamEntry:
-    "information about one single beam at specific time-step"
+    """
+    information about one single beam at specific time-step
+    """
     def __init__(self):
         self.prTotal = 0 # blank and non-blank
         self.prNonBlank = 0 # non-blank
@@ -30,24 +39,32 @@ class BeamEntry:
         self.labeling = () # beam-labeling
 
 class BeamState:
-    "information about the beams at specific time-step"
+    """
+    information about the beams at specific time-step
+    """
     def __init__(self):
         self.entries = {}
         
     def norm(self):
-        "length-normalise LM score"
+        """
+        length-normalise LM score
+        """
         for (k, _) in self.entries.items():
             labelingLen = len(self.entries[k].labeling)
             self.entries[k].prText = self.entries[k].prText ** (1.0 / (labelingLen if labelingLen else 1.0))
 
     def sort(self):
-        "return beam-labelings, sorted by probability"
+        """
+        return beam-labelings, sorted by probability
+        """
         beams = [v for (_, v) in self.entries.items()]
         sortedBeams = sorted(beams, reverse=True, key=lambda x: x.prTotal*x.prText)
         return [x.labeling for x in sortedBeams]
 
 def applyLM(parentBeam, childBeam, classes, lm):
-    "calculate LM score of child beam by taking score from parent beam and bigram probability of last two chars"
+    """
+    calculate LM score of child beam by taking score from parent beam and bigram probability of last two chars
+    """
     if lm and not childBeam.lmApplied:
         c1 = classes[parentBeam.labeling[-1] if parentBeam.labeling else classes.index(' ')] # first char
         c2 = classes[childBeam.labeling[-1]] # second char
@@ -57,12 +74,16 @@ def applyLM(parentBeam, childBeam, classes, lm):
         childBeam.lmApplied = True # only apply LM once per beam entry
 
 def addBeam(beamState, labeling):
-    "add beam if it does not yet exist"
+    """
+    add beam if it does not yet exist
+    """
     if labeling not in beamState.entries:
         beamState.entries[labeling] = BeamEntry()
 
 def ctcBeamSearch(mat, classes, lm, k, beamWidth):
-    "beam search as described by the paper of Hwang et al. and the paper of Graves et al."
+    """
+    beam search as described by the paper of Hwang et al. and the paper of Graves et al.
+    """
 
     blankIdx = len(classes)
     maxT, maxC = mat.shape
@@ -81,14 +102,14 @@ def ctcBeamSearch(mat, classes, lm, k, beamWidth):
         # get beam-labelings of best beams
         bestLabelings = last.sort()[0:beamWidth]
 
-	# go over best beams
+	    # go over best beams
         for labeling in bestLabelings:
 
-	    # probability of paths ending with a non-blank
+	        # probability of paths ending with a non-blank
             prNonBlank = 0
-	    # in case of non-empty beam
+	        # in case of non-empty beam
             if labeling:
-		# probability of paths with repeated last char at the end
+		       # probability of paths with repeated last char at the end
                 try: 
                     prNonBlank = last.entries[labeling].prNonBlank * mat[t, labeling[-1]]
                 except FloatingPointError:
@@ -119,15 +140,15 @@ def ctcBeamSearch(mat, classes, lm, k, beamWidth):
                 else:
                     prNonBlank = mat[t, c] * last.entries[labeling].prTotal
 
-		# add beam at current time-step if needed
+		        # add beam at current time-step if needed
                 addBeam(curr, newLabeling)
 				
-		# fill in data
+		        # fill in data
                 curr.entries[newLabeling].labeling = newLabeling
                 curr.entries[newLabeling].prNonBlank += prNonBlank
                 curr.entries[newLabeling].prTotal += prNonBlank
 				
-		# apply LM
+		        # apply LM
                 applyLM(curr.entries[labeling], curr.entries[newLabeling], classes, lm)
 
         # set new beam state

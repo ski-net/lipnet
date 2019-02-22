@@ -17,6 +17,7 @@
 
 """
 Module: download_data
+This module provides utilities for downloading the datasets for training LipNet
 """
 
 import os
@@ -31,14 +32,17 @@ def download_mp4(from_idx, to_idx, _params):
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
+        name = 's' + str(idx)
+        save_folder = '{src_path}/{nm}'.format(src_path=_params['src_path'], nm=name)
+        if idx == 0 or os.path.isdir(save_folder):
+            continue
+        script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/video/{nm}.mpg_vcd.zip".format( \
+                    nm=name)
+        down_sc = 'cd {src_path} && curl {script} --output {nm}.mpg_vcd.zip && \
+                    unzip {nm}.mpg_vcd.zip'.format(script=script,
+                                                   nm=name,
+                                                   src_path=_params['src_path'])
         try:
-            name = 's' + str(idx)
-            script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/video/{nm}.mpg_vcd.zip".format( \
-                     nm=name)
-            down_sc = 'cd {src_path} && curl {script} --output {nm}.mpg_vcd.zip && \
-                       unzip {nm}.mpg_vcd.zip'.format(script=script,
-                                                      nm=name,
-                                                      src_path=_params['src_path'])
             print(down_sc)
             os.system(down_sc)
             succ.add(idx)
@@ -55,13 +59,15 @@ def download_align(from_idx, to_idx, _params):
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
+        name = 's' + str(idx)
+        if idx == 0:
+            continue
+        script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/align/{nm}.tar".format(nm=name)
+        down_sc = 'cd {align_path} && wget {script} && \
+                    tar -xvf {nm}.tar'.format(script=script,
+                                              nm=name,
+                                              align_path=_params['align_path'])
         try:
-            name = 's' + str(idx)
-            script = "http://spandh.dcs.shef.ac.uk/gridcorpus/{nm}/align/{nm}.tar".format(nm=name)
-            down_sc = 'cd {align_path} && wget {script} && \
-                       tar -xvf {nm}.tar'.format(script=script,
-                                                 nm=name,
-                                                 align_path=_params['align_path'])
             print(down_sc)
             os.system(down_sc)
             succ.add(idx)
@@ -86,6 +92,7 @@ if __name__ == '__main__':
                   bzip2 -d shape_predictor_68_face_landmarks.dat.bz2')
 
     os.makedirs('{src_path}'.format(src_path=PARAMS['src_path']), exist_ok=True)
+    os.makedirs('{align_path}'.format(align_path=PARAMS['align_path']), exist_ok=True)
 
     if N_PROCESS == 1:
         RES = download_mp4(0, 35, PARAMS)

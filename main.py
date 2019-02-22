@@ -1,6 +1,3 @@
-"""
-Descrition : main module to run code
-"""
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -18,12 +15,17 @@ Descrition : main module to run code
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+Description : main module to run the lipnet training code
+"""
+
+
 import argparse
 from trainer import Train
 
 def main():
     """
-    Description : run code using argument info
+    Description : run lipnet training code using argument info
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=64)
@@ -31,11 +33,15 @@ def main():
     parser.add_argument('--image_path', type=str, default='./data/datasets/')
     parser.add_argument('--align_path', type=str, default='./data/align/')
     parser.add_argument('--dr_rate', type=float, default=0.5)
-    parser.add_argument('--use_gpu', type=bool, default=True)
-    parser.add_argument('--num_workers', type=int, default=2)
+    parser.add_argument('--num_gpus', type=int, default=1)
+    parser.add_argument('--num_workers', type=int, default=0)
+    parser.add_argument('--model_path', type=str, default=None)
     config = parser.parse_args()
     trainer = Train(config)
-    trainer.train()
+    trainer.build_model(dr_rate=config.dr_rate, path=config.model_path)
+    trainer.load_dataloader()
+    trainer.run(epochs=config.epochs)
+
 if __name__ == "__main__":
     main()
     

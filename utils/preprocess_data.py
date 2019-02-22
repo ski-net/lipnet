@@ -34,7 +34,7 @@ import dlib
 
 def mkdir_p(path):
     """
-    Make a diretory
+    Make a directory
     """
     try:
         os.makedirs(path)
@@ -112,7 +112,8 @@ class Video(object):
         mouth_frames = self.get_frames_mouth(detector, predictor, frames)
         self.face = np.array(frames)
         self.mouth = np.array(mouth_frames)
-        self.set_data(mouth_frames)
+        if mouth_frames[0] is not None:
+            self.set_data(mouth_frames)
 
     def process_frames_mouth(self, frames):
         """
@@ -137,8 +138,8 @@ class Video(object):
             for det in dets:
                 shape = predictor(frame, det)
                 i = -1
-            if shape is None: # Detector doesn't detect face, just return as is
-                return frames
+            if shape is None: # Detector doesn't detect face, just return None
+                return [None]
             mouth_points = []
             for part in shape.parts():
                 i += 1
@@ -203,31 +204,41 @@ def preprocess(from_idx, to_idx, _params):
     Preprocess: Convert a video into the mouth images
     """
     source_exts = '*.mpg'
-    source_path = _params['src_path']
-    target_path = _params['tgt_path']
+    src_path = _params['src_path']
+    tgt_path = _params['tgt_path']
     face_predictor_path = './shape_predictor_68_face_landmarks.dat'
 
     succ = set()
     fail = set()
     for idx in range(from_idx, to_idx):
-        source_path = source_path + '/' + 's' + str(idx) + '/'
-        try:
-            for filepath in find_files(source_path, source_exts):
-                print("Processing: {}".format(filepath))
+        s_id = 's' + str(idx) + '/'
+        source_path = src_path + '/' + s_id
+        target_path = tgt_path + '/' + s_id
+        fail_cnt = 0
+        for filepath in find_files(source_path, source_exts):
+            print("Processing: {}".format(filepath))
+            filepath_wo_ext = os.path.splitext(filepath)[0].split('/')[-2:]
+            target_dir = os.path.join(tgt_path, '/'.join(filepath_wo_ext))
+
+            if os.path.exists(target_dir):
+                continue
+
+            try:
                 video = Video(vtype='face', \
-                              face_predictor_path=face_predictor_path).from_video(filepath)
-
-                filepath_wo_ext = os.path.splitext(filepath)[0].split('/')[-1]
-                target_dir = os.path.join(target_path, filepath_wo_ext)
+                                face_predictor_path=face_predictor_path).from_video(filepath)
                 mkdir_p(target_dir)
-
                 i = 0
+                if video.mouth[0] is None:
+                    continue
                 for frame in video.mouth:
                     io.imsave(os.path.join(target_dir, "mouth_{0:03d}.png".format(i)), frame)
                     i += 1
+            except ValueError as error:
+                print(error)
+                fail_cnt += 1
+        if fail_cnt == 0:
             succ.add(idx)
-        except OSError as error:
-            print(error)
+        else:
             fail.add(idx)
     return (succ, fail)
 
@@ -244,9 +255,8 @@ if __name__ == '__main__':
               'tgt_path':CONFIG.tgt_path}
 
     os.makedirs('{tgt_path}'.format(tgt_path=PARAMS['tgt_path']), exist_ok=True)
-    os.system('rm -rf {tgt_path}'.format(tgt_path=PARAMS['tgt_path']))
-    
+
     if N_PROCESS == 1:
-        RES = multi_p_run(35, put_worker, preprocess, PARAMS, N_PROCESS)
-    else:
         RES = preprocess(0, 35, PARAMS)
+    else:
+        RES = multi_p_run(35, put_worker, preprocess, PARAMS, N_PROCESS)
